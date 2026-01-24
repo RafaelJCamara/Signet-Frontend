@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,9 +12,46 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Server, Bell, Shield, Database } from 'lucide-react';
+import { Server, Shield, Loader2 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 const Settings = () => {
+  const [isTesting, setIsTesting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleTestConnection = async () => {
+    setIsTesting(true);
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsTesting(false);
+
+    // Simulate success/failure randomly for demo
+    const success = Math.random() > 0.3;
+    if (success) {
+      toast({
+        title: 'Connection Successful',
+        description: 'Successfully connected to RabbitMQ server.',
+      });
+    } else {
+      toast({
+        title: 'Connection Failed',
+        description: 'Could not connect to RabbitMQ. Please check your credentials and server status.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setIsSaving(false);
+
+    toast({
+      title: 'Settings Saved',
+      description: 'Your settings have been saved successfully.',
+    });
+  };
   return (
     <AppLayout>
       <div className="p-6 lg:p-8 space-y-6 max-w-4xl">
@@ -86,7 +124,14 @@ const Settings = () => {
               />
             </div>
             <div className="flex justify-end">
-              <Button className="glow-primary">Test Connection</Button>
+              <Button
+                className="glow-primary"
+                onClick={handleTestConnection}
+                disabled={isTesting}
+              >
+                {isTesting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Test Connection
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -139,47 +184,16 @@ const Settings = () => {
           </CardContent>
         </Card>
 
-        {/* Notifications */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
-                <Bell className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-lg">Notifications</CardTitle>
-                <CardDescription>
-                  Configure alert preferences
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-base">Schema Violations</Label>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Get notified when messages fail schema validation
-                </p>
-              </div>
-              <Switch defaultChecked />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-base">Queue Errors</Label>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Get notified when queues encounter errors
-                </p>
-              </div>
-              <Switch defaultChecked />
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Save Button */}
         <div className="flex justify-end pt-4">
-          <Button className="glow-primary">Save Changes</Button>
+          <Button
+            className="glow-primary"
+            onClick={handleSaveChanges}
+            disabled={isSaving}
+          >
+            {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            Save Changes
+          </Button>
         </div>
       </div>
     </AppLayout>
