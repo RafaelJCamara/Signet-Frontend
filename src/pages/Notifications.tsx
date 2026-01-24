@@ -38,6 +38,7 @@ const Notifications = () => {
       toast({
         title: 'Connection Successful',
         description: 'Successfully connected to the email server.',
+        variant: 'success',
       });
     } else {
       toast({
@@ -57,6 +58,7 @@ const Notifications = () => {
     toast({
       title: 'Settings Saved',
       description: 'Your notification settings have been saved successfully.',
+      variant: 'success',
     });
   };
 
@@ -70,6 +72,7 @@ const Notifications = () => {
       toast({
         title: 'Test Email Sent',
         description: 'A test email has been sent to the configured address.',
+        variant: 'success',
       });
     } else {
       toast({
