@@ -31,6 +31,7 @@ const Settings = () => {
       toast({
         title: 'Connection Successful',
         description: 'Successfully connected to RabbitMQ server.',
+        variant: 'success',
       });
     } else {
       toast({
@@ -50,6 +51,7 @@ const Settings = () => {
     toast({
       title: 'Settings Saved',
       description: 'Your settings have been saved successfully.',
+      variant: 'success',
     });
   };
   return (
