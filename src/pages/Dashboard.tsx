@@ -1,0 +1,128 @@
+import { useNavigate } from 'react-router-dom';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { StatCard } from '@/components/ui/StatCard';
+import { QueueCard } from '@/components/dashboard/QueueCard';
+import { SchemaCard } from '@/components/dashboard/SchemaCard';
+import { mockQueues, mockSchemas } from '@/data/mockData';
+import { Database, FileJson, AlertTriangle, Activity, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  
+  const activeQueues = mockQueues.filter((q) => q.status === 'active').length;
+  const errorQueues = mockQueues.filter((q) => q.status === 'error').length;
+  const totalMessages = mockQueues.reduce((acc, q) => acc + q.messageCount, 0);
+
+  return (
+    <AppLayout>
+      <div className="p-6 lg:p-8 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">
+              Monitor your queues and manage message contracts
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/queues')}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Queue
+            </Button>
+            <Button
+              onClick={() => navigate('/schemas')}
+              className="glow-primary"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              New Schema
+            </Button>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            title="Total Queues"
+            value={mockQueues.length}
+            subtitle={`${activeQueues} active`}
+            icon={Database}
+            trend={{ value: 12, positive: true }}
+          />
+          <StatCard
+            title="Schemas"
+            value={mockSchemas.length}
+            subtitle="Contract definitions"
+            icon={FileJson}
+          />
+          <StatCard
+            title="Messages"
+            value={totalMessages.toLocaleString()}
+            subtitle="Across all queues"
+            icon={Activity}
+            trend={{ value: 8, positive: true }}
+          />
+          <StatCard
+            title="Issues"
+            value={errorQueues}
+            subtitle="Queues need attention"
+            icon={AlertTriangle}
+          />
+        </div>
+
+        {/* Queues Section */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-foreground">Recent Queues</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/queues')}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              View all →
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {mockQueues.slice(0, 4).map((queue) => (
+              <QueueCard
+                key={queue.id}
+                queue={queue}
+                onClick={() => navigate(`/queues/${queue.id}`)}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Schemas Section */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-foreground">Recent Schemas</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/schemas')}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              View all →
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {mockSchemas.map((schema) => (
+              <SchemaCard
+                key={schema.id}
+                schema={schema}
+                onClick={() => navigate(`/schemas/${schema.id}`)}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
+    </AppLayout>
+  );
+};
+
+export default Dashboard;
