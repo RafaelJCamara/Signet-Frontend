@@ -30,10 +30,10 @@ const QueueDetail = () => {
 
   const [exchange, setExchange] = useState(queue?.exchange || '');
   const [routingKey, setRoutingKey] = useState(queue?.routingKey || '');
-  const [selectedSchemaId, setSelectedSchemaId] = useState(queue?.schemaId || '');
+  const [selectedSchemaId, setSelectedSchemaId] = useState(queue?.schemaId || 'none');
   const [isSaving, setIsSaving] = useState(false);
 
-  const selectedSchema = selectedSchemaId
+  const selectedSchema = selectedSchemaId && selectedSchemaId !== 'none'
     ? mockSchemas.find((s) => s.id === selectedSchemaId)
     : undefined;
 
@@ -153,7 +153,7 @@ const QueueDetail = () => {
                     <SelectValue placeholder="Select a contract..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No contract</SelectItem>
+                    <SelectItem value="none">No contract</SelectItem>
                     {mockSchemas.map((schema) => (
                       <SelectItem key={schema.id} value={schema.id}>
                         {schema.name} (v{schema.version})
