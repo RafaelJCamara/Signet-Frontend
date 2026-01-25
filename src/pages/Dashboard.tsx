@@ -4,15 +4,19 @@ import { StatCard } from '@/components/ui/StatCard';
 import { QueueCard } from '@/components/dashboard/QueueCard';
 import { SchemaCard } from '@/components/dashboard/SchemaCard';
 import { mockQueues, mockSchemas } from '@/data/mockData';
-import { Database, FileJson, AlertTriangle, Activity, Plus } from 'lucide-react';
+import { Database, FileJson, AlertTriangle, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   
   const activeQueues = mockQueues.filter((q) => q.status === 'active').length;
-  const errorQueues = mockQueues.filter((q) => q.status === 'error').length;
-  const totalMessages = mockQueues.reduce((acc, q) => acc + q.messageCount, 0);
+  const issueQueues = mockQueues.filter((q) => q.status === 'error' || q.status === 'missing').length;
+
+  const getSchemaForQueue = (schemaId?: string) => {
+    if (!schemaId) return undefined;
+    return mockSchemas.find((s) => s.id === schemaId);
+  };
 
   return (
     <AppLayout>
@@ -22,7 +26,7 @@ const Dashboard = () => {
           <div>
             <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
             <p className="text-muted-foreground mt-1">
-              Monitor your queues and manage message contracts
+              Monitor your queues and message contracts
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -38,37 +42,29 @@ const Dashboard = () => {
               className="glow-primary"
             >
               <Plus className="w-4 h-4 mr-2" />
-              New Schema
+              New Contract
             </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
             title="Total Queues"
             value={mockQueues.length}
             subtitle={`${activeQueues} active`}
             icon={Database}
-            trend={{ value: 12, positive: true }}
           />
           <StatCard
-            title="Schemas"
+            title="Contracts"
             value={mockSchemas.length}
-            subtitle="Contract definitions"
+            subtitle="Message schemas"
             icon={FileJson}
           />
           <StatCard
-            title="Messages"
-            value={totalMessages.toLocaleString()}
-            subtitle="Across all queues"
-            icon={Activity}
-            trend={{ value: 8, positive: true }}
-          />
-          <StatCard
             title="Issues"
-            value={errorQueues}
-            subtitle="Queues need attention"
+            value={issueQueues}
+            subtitle="Need attention"
             icon={AlertTriangle}
           />
         </div>
@@ -76,7 +72,7 @@ const Dashboard = () => {
         {/* Queues Section */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Recent Queues</h2>
+            <h2 className="text-lg font-semibold text-foreground">Queues</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -91,6 +87,7 @@ const Dashboard = () => {
               <QueueCard
                 key={queue.id}
                 queue={queue}
+                schema={getSchemaForQueue(queue.schemaId)}
                 onClick={() => navigate(`/queues/${queue.id}`)}
               />
             ))}
@@ -100,7 +97,7 @@ const Dashboard = () => {
         {/* Schemas Section */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Recent Schemas</h2>
+            <h2 className="text-lg font-semibold text-foreground">Contracts</h2>
             <Button
               variant="ghost"
               size="sm"

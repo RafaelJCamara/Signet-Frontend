@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 
 interface StatusBadgeProps {
-  status: 'active' | 'inactive' | 'error';
+  status: 'active' | 'error' | 'missing';
   className?: string;
 }
 
@@ -12,17 +12,17 @@ const statusConfig = {
     bgClass: 'bg-success/10',
     textClass: 'text-success',
   },
-  inactive: {
-    label: 'Inactive',
-    dotClass: 'bg-muted-foreground',
-    bgClass: 'bg-muted',
-    textClass: 'text-muted-foreground',
-  },
   error: {
     label: 'Error',
     dotClass: 'bg-destructive',
     bgClass: 'bg-destructive/10',
     textClass: 'text-destructive',
+  },
+  missing: {
+    label: 'Missing',
+    dotClass: 'bg-warning',
+    bgClass: 'bg-warning/10',
+    textClass: 'text-warning',
   },
 };
 

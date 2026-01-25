@@ -30,12 +30,15 @@ const Queues = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const filteredQueues = mockQueues.filter((queue) => {
-    const matchesSearch =
-      queue.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      queue.routingKey.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = queue.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || queue.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const getSchemaForQueue = (schemaId?: string) => {
+    if (!schemaId) return undefined;
+    return mockSchemas.find((s) => s.id === schemaId);
+  };
 
   return (
     <AppLayout>
@@ -45,21 +48,21 @@ const Queues = () => {
           <div>
             <h1 className="text-2xl font-bold text-foreground">Queues</h1>
             <p className="text-muted-foreground mt-1">
-              Configure RabbitMQ queues and assign schemas
+              Manage queues and their message contracts
             </p>
           </div>
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
               <Button className="glow-primary">
                 <Plus className="w-4 h-4 mr-2" />
-                Create Queue
+                Add Queue
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg">
               <DialogHeader>
-                <DialogTitle>Create New Queue</DialogTitle>
+                <DialogTitle>Add Queue</DialogTitle>
                 <DialogDescription>
-                  Configure a new queue and optionally assign a schema contract.
+                  Register a queue and assign a message contract.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
@@ -72,26 +75,10 @@ const Queues = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="exchange">Exchange</Label>
-                  <Input
-                    id="exchange"
-                    placeholder="e.g., orders.exchange"
-                    className="font-mono"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="routing">Routing Key</Label>
-                  <Input
-                    id="routing"
-                    placeholder="e.g., order.created"
-                    className="font-mono"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="schema">Assign Schema (Optional)</Label>
+                  <Label htmlFor="schema">Assign Contract</Label>
                   <Select>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a schema..." />
+                      <SelectValue placeholder="Select a contract..." />
                     </SelectTrigger>
                     <SelectContent>
                       {mockSchemas.map((schema) => (
@@ -107,7 +94,7 @@ const Queues = () => {
                 <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
                   Cancel
                 </Button>
-                <Button className="glow-primary">Create Queue</Button>
+                <Button className="glow-primary">Add Queue</Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -132,8 +119,8 @@ const Queues = () => {
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
               <SelectItem value="error">Error</SelectItem>
+              <SelectItem value="missing">Missing</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -148,6 +135,7 @@ const Queues = () => {
             >
               <QueueCard
                 queue={queue}
+                schema={getSchemaForQueue(queue.schemaId)}
                 onClick={() => navigate(`/queues/${queue.id}`)}
               />
             </div>
