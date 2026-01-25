@@ -15,7 +15,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { JsonSchemaViewer } from '@/components/schema/JsonSchemaViewer';
-import { ArrowLeft, Save, Trash2, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Loader2, Pencil, Check, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const QueueDetail = () => {
@@ -24,12 +24,9 @@ const QueueDetail = () => {
   const { toast } = useToast();
 
   const queue = mockQueues.find((q) => q.id === id);
-  const assignedSchema = queue?.schemaId
-    ? mockSchemas.find((s) => s.id === queue.schemaId)
-    : undefined;
 
-  const [exchange, setExchange] = useState(queue?.exchange || '');
-  const [routingKey, setRoutingKey] = useState(queue?.routingKey || '');
+  const [queueName, setQueueName] = useState(queue?.name || '');
+  const [isEditingName, setIsEditingName] = useState(false);
   const [selectedSchemaId, setSelectedSchemaId] = useState(queue?.schemaId || 'none');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -73,6 +70,20 @@ const QueueDetail = () => {
     navigate('/queues');
   };
 
+  const handleSaveName = () => {
+    setIsEditingName(false);
+    toast({
+      title: 'Queue Renamed',
+      description: `Queue has been renamed to "${queueName}".`,
+      variant: 'success',
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setQueueName(queue.name);
+    setIsEditingName(false);
+  };
+
   return (
     <AppLayout>
       <div className="p-6 lg:p-8 space-y-6">
@@ -83,10 +94,32 @@ const QueueDetail = () => {
           </Button>
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-foreground">{queue.name}</h1>
+              {isEditingName ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={queueName}
+                    onChange={(e) => setQueueName(e.target.value)}
+                    className="text-xl font-bold h-9 w-64"
+                    autoFocus
+                  />
+                  <Button variant="ghost" size="icon" onClick={handleSaveName}>
+                    <Check className="w-4 h-4 text-success" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={handleCancelEdit}>
+                    <X className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <h1 className="text-2xl font-bold text-foreground">{queueName}</h1>
+                  <Button variant="ghost" size="icon" onClick={() => setIsEditingName(true)}>
+                    <Pencil className="w-4 h-4 text-muted-foreground" />
+                  </Button>
+                </>
+              )}
               <StatusBadge status={queue.status} />
             </div>
-            <p className="text-muted-foreground mt-1">Configure queue routing and contract</p>
+            <p className="text-muted-foreground mt-1">Configure queue contract</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleDelete}>
@@ -104,70 +137,36 @@ const QueueDetail = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Routing Configuration */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Routing Configuration</CardTitle>
-              <CardDescription>
-                Configure the exchange and routing key for this queue
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="exchange">Exchange</Label>
-                <Input
-                  id="exchange"
-                  value={exchange}
-                  onChange={(e) => setExchange(e.target.value)}
-                  placeholder="e.g., orders.exchange"
-                  className="font-mono"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="routingKey">Routing Key</Label>
-                <Input
-                  id="routingKey"
-                  value={routingKey}
-                  onChange={(e) => setRoutingKey(e.target.value)}
-                  placeholder="e.g., order.created"
-                  className="font-mono"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Contract Assignment */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Message Contract</CardTitle>
-              <CardDescription>
-                Assign a JSON Schema contract for message validation
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="schema">Contract</Label>
-                <Select value={selectedSchemaId} onValueChange={setSelectedSchemaId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a contract..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No contract</SelectItem>
-                    {mockSchemas.map((schema) => (
-                      <SelectItem key={schema.id} value={schema.id}>
-                        {schema.name} (v{schema.version})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {selectedSchema && (
-                <p className="text-sm text-muted-foreground">{selectedSchema.description}</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        {/* Contract Assignment */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Message Contract</CardTitle>
+            <CardDescription>
+              Assign a JSON Schema contract for message validation
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="schema">Contract</Label>
+              <Select value={selectedSchemaId} onValueChange={setSelectedSchemaId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a contract..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No contract</SelectItem>
+                  {mockSchemas.map((schema) => (
+                    <SelectItem key={schema.id} value={schema.id}>
+                      {schema.name} (v{schema.version})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedSchema && (
+              <p className="text-sm text-muted-foreground">{selectedSchema.description}</p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Schema Preview */}
         {selectedSchema && (
