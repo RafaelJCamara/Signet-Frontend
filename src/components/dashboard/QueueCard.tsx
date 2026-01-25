@@ -1,15 +1,15 @@
-import { Queue } from '@/types/schema';
+import { Queue, Schema } from '@/types/schema';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { cn } from '@/lib/utils';
-import { ArrowRight, Users, MessageSquare } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowRight, FileJson, AlertTriangle } from 'lucide-react';
 
 interface QueueCardProps {
   queue: Queue;
+  schema?: Schema;
   onClick?: () => void;
 }
 
-export function QueueCard({ queue, onClick }: QueueCardProps) {
+export function QueueCard({ queue, schema, onClick }: QueueCardProps) {
   return (
     <div
       className={cn(
@@ -21,40 +21,28 @@ export function QueueCard({ queue, onClick }: QueueCardProps) {
       onClick={onClick}
     >
       <div className="flex items-start justify-between mb-4">
-        <div>
-          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
             {queue.name}
           </h3>
-          <p className="text-sm text-muted-foreground font-mono mt-0.5">
-            {queue.routingKey}
-          </p>
         </div>
-        <StatusBadge status={queue.status} />
-      </div>
-
-      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-        <div className="flex items-center gap-1.5">
-          <MessageSquare className="w-4 h-4" />
-          <span>{queue.messageCount.toLocaleString()}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Users className="w-4 h-4" />
-          <span>{queue.consumerCount} consumers</span>
-        </div>
+        <StatusBadge status={queue.status} className="ml-2 flex-shrink-0" />
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">
-          Exchange: <span className="font-mono text-foreground/80">{queue.exchange}</span>
-        </p>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="opacity-0 group-hover:opacity-100 transition-opacity text-primary"
-        >
-          Configure
-          <ArrowRight className="w-4 h-4 ml-1" />
-        </Button>
+        {schema ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <FileJson className="w-4 h-4 text-primary" />
+            <span className="font-mono truncate">{schema.name}</span>
+            <span className="text-xs text-muted-foreground/70">v{schema.version}</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <AlertTriangle className="w-4 h-4 text-warning" />
+            <span className="italic">No contract assigned</span>
+          </div>
+        )}
+        <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:text-primary transition-all" />
       </div>
 
       {/* Decorative gradient */}

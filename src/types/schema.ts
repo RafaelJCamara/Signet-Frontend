@@ -1,11 +1,9 @@
 export interface Queue {
   id: string;
   name: string;
-  exchange: string;
-  routingKey: string;
-  status: 'active' | 'inactive' | 'error';
-  messageCount: number;
-  consumerCount: number;
+  exchange?: string;
+  routingKey?: string;
+  status: 'active' | 'error' | 'missing';
   createdAt: string;
   schemaId?: string;
 }

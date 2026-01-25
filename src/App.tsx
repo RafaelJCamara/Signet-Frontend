@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Queues from "./pages/Queues";
+import QueueDetail from "./pages/QueueDetail";
 import Schemas from "./pages/Schemas";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
@@ -21,6 +22,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/queues" element={<Queues />} />
+          <Route path="/queues/:id" element={<QueueDetail />} />
           <Route path="/schemas" element={<Schemas />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/settings" element={<Settings />} />

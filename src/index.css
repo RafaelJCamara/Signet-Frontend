@@ -40,8 +40,11 @@
 
     /* Custom tokens */
     --success: 160 84% 39%;
+    --success-foreground: 222 47% 6%;
     --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 6%;
     --info: 217 91% 60%;
+    --info-foreground: 222 47% 6%;
     
     --glow-primary: 173 80% 50%;
     --glow-accent: 160 84% 39%;
