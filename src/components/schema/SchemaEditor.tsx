@@ -105,20 +105,6 @@ export function SchemaEditor({
     }
   };
 
-  const incrementVersion = (type: 'major' | 'minor' | 'patch') => {
-    const parts = version.split('.').map(Number);
-    if (parts.length !== 3 || parts.some(isNaN)) {
-      setVersion('1.0.0');
-      return;
-    }
-    if (type === 'major') {
-      setVersion(`${parts[0] + 1}.0.0`);
-    } else if (type === 'minor') {
-      setVersion(`${parts[0]}.${parts[1] + 1}.0`);
-    } else {
-      setVersion(`${parts[0]}.${parts[1]}.${parts[2] + 1}`);
-    }
-  };
 
   const highlightedHtml = syntaxHighlight(schemaText);
 
@@ -138,33 +124,13 @@ export function SchemaEditor({
             </div>
             <div className="space-y-2">
               <Label htmlFor="version">Version</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="version"
-                  value={version}
-                  onChange={(e) => setVersion(e.target.value)}
-                  placeholder="e.g., 1.0.0"
-                  className="font-mono flex-1"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => incrementVersion('patch')}
-                  title="Increment patch version"
-                >
-                  +0.0.1
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => incrementVersion('minor')}
-                  title="Increment minor version"
-                >
-                  +0.1.0
-                </Button>
-              </div>
+              <Input
+                id="version"
+                value={version}
+                onChange={(e) => setVersion(e.target.value)}
+                placeholder="e.g., 1.0.0"
+                className="font-mono"
+              />
             </div>
           </div>
           <div className="space-y-2">
