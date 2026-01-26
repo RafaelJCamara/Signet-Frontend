@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatCard } from '@/components/ui/StatCard';
@@ -6,12 +7,21 @@ import { SchemaCard } from '@/components/dashboard/SchemaCard';
 import { mockQueues, mockSchemas } from '@/data/mockData';
 import { Database, FileJson, AlertTriangle, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { StatusBadge } from '@/components/ui/StatusBadge';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [isIssuesOpen, setIsIssuesOpen] = useState(false);
   
   const activeQueues = mockQueues.filter((q) => q.status === 'active').length;
-  const issueQueues = mockQueues.filter((q) => q.status === 'error' || q.status === 'missing').length;
+  const issueQueues = mockQueues.filter((q) => q.status === 'error' || q.status === 'missing');
 
   const getSchemaForQueue = (schemaId?: string) => {
     if (!schemaId) return undefined;
@@ -61,12 +71,17 @@ const Dashboard = () => {
             subtitle="Message schemas"
             icon={FileJson}
           />
-          <StatCard
-            title="Issues"
-            value={issueQueues}
-            subtitle="Need attention"
-            icon={AlertTriangle}
-          />
+          <div
+            onClick={() => setIsIssuesOpen(true)}
+            className="cursor-pointer"
+          >
+            <StatCard
+              title="Issues"
+              value={issueQueues.length}
+              subtitle="Need attention"
+              icon={AlertTriangle}
+            />
+          </div>
         </div>
 
         {/* Queues Section */}
@@ -117,6 +132,45 @@ const Dashboard = () => {
             ))}
           </div>
         </section>
+
+        {/* Issues Dialog */}
+        <Dialog open={isIssuesOpen} onOpenChange={setIsIssuesOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Queue Issues</DialogTitle>
+              <DialogDescription>
+                Queues that need attention
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4 max-h-[400px] overflow-y-auto">
+              {issueQueues.length === 0 ? (
+                <p className="text-center text-muted-foreground py-4">
+                  No issues found. All queues are healthy!
+                </p>
+              ) : (
+                issueQueues.map((queue) => (
+                  <button
+                    key={queue.id}
+                    onClick={() => {
+                      setIsIssuesOpen(false);
+                      navigate(`/queues/${queue.id}`);
+                    }}
+                    className="w-full p-3 text-left rounded-lg border border-border hover:border-primary/50 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium font-mono">{queue.name}</span>
+                      <StatusBadge status={queue.status} />
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {queue.status === 'error' && 'Queue has validation errors'}
+                      {queue.status === 'missing' && 'Queue is missing required contract'}
+                    </p>
+                  </button>
+                ))
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );

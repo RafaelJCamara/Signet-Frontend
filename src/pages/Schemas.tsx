@@ -7,8 +7,6 @@ import { JsonSchemaViewer } from '@/components/schema/JsonSchemaViewer';
 import { mockSchemas } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -65,37 +63,14 @@ const Schemas = () => {
                   Define a JSON Schema contract for your message validation.
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="schema-name">Schema Name</Label>
-                    <Input
-                      id="schema-name"
-                      placeholder="e.g., OrderCreatedEvent"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="version">Version</Label>
-                    <Input
-                      id="version"
-                      placeholder="e.g., 1.0.0"
-                      className="font-mono"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Describe what this schema validates..."
-                    rows={2}
-                  />
-                </div>
+              <div className="py-4">
                 <SchemaEditor
-                  onSave={(schema) => {
-                    console.log('Schema saved:', schema);
+                  showMetadata
+                  onSave={(data) => {
+                    console.log('Schema saved:', data);
                     setIsCreateOpen(false);
                   }}
+                  onCancel={() => setIsCreateOpen(false)}
                 />
               </div>
             </DialogContent>
@@ -162,10 +137,15 @@ const Schemas = () => {
                   <TabsContent value="edit">
                     <SchemaEditor
                       initialSchema={selectedSchema.jsonSchema}
-                      onSave={(schema) => {
-                        console.log('Updated schema:', schema);
+                      initialName={selectedSchema.name}
+                      initialDescription={selectedSchema.description}
+                      initialVersion={selectedSchema.version}
+                      showMetadata
+                      onSave={(data) => {
+                        console.log('Updated schema:', data);
                         setSelectedSchema(null);
                       }}
+                      onCancel={() => setSelectedSchema(null)}
                     />
                   </TabsContent>
                 </Tabs>

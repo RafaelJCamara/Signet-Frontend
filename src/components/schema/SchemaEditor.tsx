@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,16 +8,59 @@ import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface SchemaEditorProps {
   initialSchema?: object;
-  onSave?: (schema: object) => void;
+  initialName?: string;
+  initialDescription?: string;
+  initialVersion?: string;
+  showMetadata?: boolean;
+  onSave?: (data: { schema: object; name?: string; description?: string; version?: string }) => void;
+  onCancel?: () => void;
   className?: string;
 }
 
-export function SchemaEditor({ initialSchema, onSave, className }: SchemaEditorProps) {
+function syntaxHighlight(json: string): string {
+  return json
+    .replace(
+      /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?)/g,
+      (match) => {
+        if (match.endsWith(':')) {
+          return `<span class="text-syntax-property">${match}</span>`;
+        }
+        return `<span class="text-syntax-string">${match}</span>`;
+      }
+    )
+    .replace(/\b(true|false)\b/g, '<span class="text-syntax-boolean">$1</span>')
+    .replace(/\b(null)\b/g, '<span class="text-muted-foreground">$1</span>')
+    .replace(/\b(\d+)\b/g, '<span class="text-syntax-number">$1</span>');
+}
+
+export function SchemaEditor({
+  initialSchema,
+  initialName = '',
+  initialDescription = '',
+  initialVersion = '1.0.0',
+  showMetadata = false,
+  onSave,
+  onCancel,
+  className,
+}: SchemaEditorProps) {
   const [schemaText, setSchemaText] = useState(
     initialSchema ? JSON.stringify(initialSchema, null, 2) : ''
   );
+  const [name, setName] = useState(initialName);
+  const [description, setDescription] = useState(initialDescription);
+  const [version, setVersion] = useState(initialVersion);
   const [validationStatus, setValidationStatus] = useState<'valid' | 'invalid' | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const highlightRef = useRef<HTMLDivElement>(null);
+
+  // Sync scroll between textarea and highlight overlay
+  const handleScroll = () => {
+    if (textareaRef.current && highlightRef.current) {
+      highlightRef.current.scrollTop = textareaRef.current.scrollTop;
+      highlightRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    }
+  };
 
   const validateSchema = () => {
     try {
@@ -41,7 +84,12 @@ export function SchemaEditor({ initialSchema, onSave, className }: SchemaEditorP
   const handleSave = () => {
     const parsed = validateSchema();
     if (parsed && onSave) {
-      onSave(parsed);
+      onSave({
+        schema: parsed,
+        name: showMetadata ? name : undefined,
+        description: showMetadata ? description : undefined,
+        version: showMetadata ? version : undefined,
+      });
     }
   };
 
@@ -57,8 +105,81 @@ export function SchemaEditor({ initialSchema, onSave, className }: SchemaEditorP
     }
   };
 
+  const incrementVersion = (type: 'major' | 'minor' | 'patch') => {
+    const parts = version.split('.').map(Number);
+    if (parts.length !== 3 || parts.some(isNaN)) {
+      setVersion('1.0.0');
+      return;
+    }
+    if (type === 'major') {
+      setVersion(`${parts[0] + 1}.0.0`);
+    } else if (type === 'minor') {
+      setVersion(`${parts[0]}.${parts[1] + 1}.0`);
+    } else {
+      setVersion(`${parts[0]}.${parts[1]}.${parts[2] + 1}`);
+    }
+  };
+
+  const highlightedHtml = syntaxHighlight(schemaText);
+
   return (
     <div className={cn('space-y-4', className)}>
+      {showMetadata && (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="schema-name">Schema Name</Label>
+              <Input
+                id="schema-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g., OrderCreatedEvent"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="version">Version</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="version"
+                  value={version}
+                  onChange={(e) => setVersion(e.target.value)}
+                  placeholder="e.g., 1.0.0"
+                  className="font-mono flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => incrementVersion('patch')}
+                  title="Increment patch version"
+                >
+                  +0.0.1
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => incrementVersion('minor')}
+                  title="Increment minor version"
+                >
+                  +0.1.0
+                </Button>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe what this schema validates..."
+              rows={2}
+            />
+          </div>
+        </>
+      )}
+
       <div className="flex items-center justify-between">
         <Label className="text-sm font-medium">JSON Schema Definition</Label>
         <div className="flex items-center gap-2">
@@ -92,13 +213,30 @@ export function SchemaEditor({ initialSchema, onSave, className }: SchemaEditorP
       </div>
 
       <div className="relative">
-        <Textarea
-          value={schemaText}
-          onChange={(e) => {
-            setSchemaText(e.target.value);
-            setValidationStatus(null);
-          }}
-          placeholder={`{
+        <div
+          className={cn(
+            'relative rounded-lg border overflow-hidden',
+            'bg-muted/30 border-border',
+            validationStatus === 'invalid' && 'border-destructive'
+          )}
+        >
+          {/* Syntax highlighted background */}
+          <div
+            ref={highlightRef}
+            className="absolute inset-0 p-3 overflow-auto pointer-events-none font-mono text-sm leading-relaxed whitespace-pre-wrap break-words"
+            style={{ wordBreak: 'break-word' }}
+            dangerouslySetInnerHTML={{ __html: highlightedHtml || '&nbsp;' }}
+          />
+          {/* Transparent textarea on top */}
+          <textarea
+            ref={textareaRef}
+            value={schemaText}
+            onChange={(e) => {
+              setSchemaText(e.target.value);
+              setValidationStatus(null);
+            }}
+            onScroll={handleScroll}
+            placeholder={`{
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
@@ -107,12 +245,15 @@ export function SchemaEditor({ initialSchema, onSave, className }: SchemaEditorP
   },
   "required": ["id", "name"]
 }`}
-          className={cn(
-            'min-h-[400px] font-mono text-sm resize-none',
-            'bg-muted/30 border-border',
-            validationStatus === 'invalid' && 'border-destructive focus-visible:ring-destructive'
-          )}
-        />
+            className={cn(
+              'relative w-full min-h-[400px] p-3 font-mono text-sm leading-relaxed resize-none',
+              'bg-transparent text-transparent caret-foreground',
+              'focus:outline-none focus:ring-2 focus:ring-primary/50',
+              'placeholder:text-muted-foreground'
+            )}
+            spellCheck={false}
+          />
+        </div>
       </div>
 
       {errorMessage && (
@@ -123,7 +264,9 @@ export function SchemaEditor({ initialSchema, onSave, className }: SchemaEditorP
       )}
 
       <div className="flex justify-end gap-2">
-        <Button variant="outline">Cancel</Button>
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
         <Button onClick={handleSave} className="glow-primary">
           Save Schema
         </Button>

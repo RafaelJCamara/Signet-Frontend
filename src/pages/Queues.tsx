@@ -28,6 +28,8 @@ const Queues = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [newQueueName, setNewQueueName] = useState('');
+  const [newQueueSchemaId, setNewQueueSchemaId] = useState('none');
 
   const filteredQueues = mockQueues.filter((queue) => {
     const matchesSearch = queue.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -38,6 +40,14 @@ const Queues = () => {
   const getSchemaForQueue = (schemaId?: string) => {
     if (!schemaId) return undefined;
     return mockSchemas.find((s) => s.id === schemaId);
+  };
+
+  const handleCreateQueue = () => {
+    if (!newQueueName.trim()) return;
+    console.log('Creating queue:', { name: newQueueName, schemaId: newQueueSchemaId });
+    setIsCreateOpen(false);
+    setNewQueueName('');
+    setNewQueueSchemaId('none');
   };
 
   return (
@@ -70,17 +80,20 @@ const Queues = () => {
                   <Label htmlFor="name">Queue Name</Label>
                   <Input
                     id="name"
+                    value={newQueueName}
+                    onChange={(e) => setNewQueueName(e.target.value)}
                     placeholder="e.g., order-events"
                     className="font-mono"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="schema">Assign Contract</Label>
-                  <Select>
+                  <Select value={newQueueSchemaId} onValueChange={setNewQueueSchemaId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a contract..." />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">No contract</SelectItem>
                       {mockSchemas.map((schema) => (
                         <SelectItem key={schema.id} value={schema.id}>
                           {schema.name} (v{schema.version})
@@ -94,7 +107,9 @@ const Queues = () => {
                 <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
                   Cancel
                 </Button>
-                <Button className="glow-primary">Add Queue</Button>
+                <Button className="glow-primary" onClick={handleCreateQueue}>
+                  Add Queue
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
