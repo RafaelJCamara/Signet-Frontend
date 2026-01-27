@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SchemaEditor } from '@/components/schema/SchemaEditor';
 import { JsonSchemaViewer } from '@/components/schema/JsonSchemaViewer';
@@ -40,6 +41,7 @@ interface SchemaGroup {
 }
 
 const Schemas = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -53,6 +55,24 @@ const Schemas = () => {
   } | null>(null);
   const [selectedSchema, setSelectedSchema] = useState<Schema | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  // Handle URL parameters for opening create dialog or expanding a specific schema
+  useEffect(() => {
+    const createParam = searchParams.get('create');
+    const schemaParam = searchParams.get('schema');
+    
+    if (createParam === 'true') {
+      setIsCreateOpen(true);
+      // Clear the param after opening
+      setSearchParams({}, { replace: true });
+    }
+    
+    if (schemaParam) {
+      setExpandedGroups(new Set([schemaParam]));
+      // Clear the param after expanding
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Group schemas by schemaId
   const schemaGroups = useMemo(() => {
