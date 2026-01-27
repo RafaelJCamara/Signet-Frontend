@@ -157,7 +157,7 @@ const Notifications = () => {
                         id="admin-email"
                         type="email"
                         placeholder="admin@example.com"
-                        defaultValue="admin@schemaregistry.com"
+                        defaultValue="admin@signet.com"
                       />
                       <p className="text-xs text-muted-foreground">
                         Critical system alerts will be sent to this address

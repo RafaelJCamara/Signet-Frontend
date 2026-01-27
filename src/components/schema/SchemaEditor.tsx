@@ -1,18 +1,33 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { AlertCircle, CheckCircle2, Info } from 'lucide-react';
 
 interface SchemaEditorProps {
   initialSchema?: object;
   initialName?: string;
   initialDescription?: string;
   initialVersion?: string;
+  initialSchemaId?: string;
+  initialChangelog?: string;
   showMetadata?: boolean;
-  onSave?: (data: { schema: object; name?: string; description?: string; version?: string }) => void;
+  isNewSchema?: boolean;
+  onSave?: (data: { 
+    schema: object; 
+    name?: string; 
+    description?: string; 
+    version?: string;
+    schemaId?: string;
+    changelog?: string;
+  }) => void;
   onCancel?: () => void;
   className?: string;
 }
@@ -33,12 +48,23 @@ function syntaxHighlight(json: string): string {
     .replace(/\b(\d+)\b/g, '<span class="text-syntax-number">$1</span>');
 }
 
+function generateSchemaId(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
 export function SchemaEditor({
   initialSchema,
   initialName = '',
   initialDescription = '',
   initialVersion = '1.0.0',
+  initialSchemaId = '',
+  initialChangelog = '',
   showMetadata = false,
+  isNewSchema = false,
   onSave,
   onCancel,
   className,
@@ -49,10 +75,21 @@ export function SchemaEditor({
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
   const [version, setVersion] = useState(initialVersion);
+  const [schemaId, setSchemaId] = useState(initialSchemaId);
+  const [changelog, setChangelog] = useState(initialChangelog);
   const [validationStatus, setValidationStatus] = useState<'valid' | 'invalid' | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [schemaIdTouched, setSchemaIdTouched] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
+
+  // Auto-generate schemaId from name if not touched by user
+  const handleNameChange = (newName: string) => {
+    setName(newName);
+    if (isNewSchema && !schemaIdTouched) {
+      setSchemaId(generateSchemaId(newName));
+    }
+  };
 
   // Sync scroll between textarea and highlight overlay
   const handleScroll = () => {
@@ -89,6 +126,8 @@ export function SchemaEditor({
         name: showMetadata ? name : undefined,
         description: showMetadata ? description : undefined,
         version: showMetadata ? version : undefined,
+        schemaId: showMetadata ? schemaId : undefined,
+        changelog: showMetadata ? changelog : undefined,
       });
     }
   };
@@ -105,7 +144,6 @@ export function SchemaEditor({
     }
   };
 
-
   const highlightedHtml = syntaxHighlight(schemaText);
 
   return (
@@ -118,12 +156,29 @@ export function SchemaEditor({
               <Input
                 id="schema-name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="e.g., OrderCreatedEvent"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="version">Version</Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="version">Version</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs">
+                    <p className="text-sm">
+                      Follow <strong>Semantic Versioning</strong> (SemVer):
+                    </p>
+                    <ul className="text-xs mt-1 space-y-0.5">
+                      <li><strong>MAJOR</strong> (x.0.0): Breaking changes</li>
+                      <li><strong>MINOR</strong> (0.x.0): New features, backward compatible</li>
+                      <li><strong>PATCH</strong> (0.0.x): Bug fixes, backward compatible</li>
+                    </ul>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <Input
                 id="version"
                 value={version}
@@ -133,6 +188,38 @@ export function SchemaEditor({
               />
             </div>
           </div>
+
+          {isNewSchema && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="schema-id">Schema ID</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs">
+                    <p className="text-sm">
+                      A unique identifier for this schema type. This ID <strong>cannot be changed</strong> once the schema is created. All versions of this schema will share this ID.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <Input
+                id="schema-id"
+                value={schemaId}
+                onChange={(e) => {
+                  setSchemaId(e.target.value);
+                  setSchemaIdTouched(true);
+                }}
+                placeholder="e.g., order-created-event"
+                className="font-mono"
+              />
+              <p className="text-xs text-muted-foreground">
+                Auto-generated from name. Edit if needed.
+              </p>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
@@ -142,6 +229,20 @@ export function SchemaEditor({
               placeholder="Describe what this schema validates..."
               rows={2}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="changelog">Changelog Note</Label>
+            <Textarea
+              id="changelog"
+              value={changelog}
+              onChange={(e) => setChangelog(e.target.value)}
+              placeholder="Describe what changed in this version..."
+              rows={2}
+            />
+            <p className="text-xs text-muted-foreground">
+              A brief note about what was added, changed, or fixed in this version.
+            </p>
           </div>
         </>
       )}
