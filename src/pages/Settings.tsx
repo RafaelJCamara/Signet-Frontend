@@ -30,13 +30,13 @@ const Settings = () => {
     if (success) {
       toast({
         title: 'Connection Successful',
-        description: 'Successfully connected to RabbitMQ server.',
+        description: 'Successfully connected to Schema registry server.',
         variant: 'success',
       });
     } else {
       toast({
         title: 'Connection Failed',
-        description: 'Could not connect to RabbitMQ. Please check your credentials and server status.',
+        description: 'Could not connect to Schema registry. Please check your credentials and server status.',
         variant: 'destructive',
       });
     }
@@ -61,7 +61,7 @@ const Settings = () => {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Settings</h1>
           <p className="text-muted-foreground mt-1">
-            Configure your Schema Registry preferences
+            Configure your Signet preferences
           </p>
         </div>
 
@@ -73,9 +73,9 @@ const Settings = () => {
                 <Server className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg">RabbitMQ Connection</CardTitle>
+                <CardTitle className="text-lg">Schema Registry Connection</CardTitle>
                 <CardDescription>
-                  Configure your RabbitMQ server connection
+                  Configure your Schema registry server connection
                 </CardDescription>
               </div>
             </div>

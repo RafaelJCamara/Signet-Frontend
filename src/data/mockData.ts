@@ -39,9 +39,11 @@ export const mockQueues: Queue[] = [
 export const mockSchemas: Schema[] = [
   {
     id: '1',
+    schemaId: 'order-created-event',
     name: 'OrderCreatedEvent',
     version: '1.0.0',
     description: 'Initial schema for order creation events',
+    changelog: 'Initial version with basic order fields',
     jsonSchema: {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "type": "object",
@@ -63,9 +65,11 @@ export const mockSchemas: Schema[] = [
   },
   {
     id: '1a',
+    schemaId: 'order-created-event',
     name: 'OrderCreatedEvent',
     version: '1.1.0',
     description: 'Added customer information to order events',
+    changelog: 'Added customerId field to track customer association',
     jsonSchema: {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "type": "object",
@@ -93,9 +97,11 @@ export const mockSchemas: Schema[] = [
   },
   {
     id: '1b',
+    schemaId: 'order-created-event',
     name: 'OrderCreatedEvent',
     version: '1.2.0',
     description: 'Added items array to order events',
+    changelog: 'Added items array with product details (productId, quantity, price)',
     jsonSchema: {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "type": "object",
@@ -134,9 +140,11 @@ export const mockSchemas: Schema[] = [
   },
   {
     id: '1c',
+    schemaId: 'order-created-event',
     name: 'OrderCreatedEvent',
     version: '2.0.0',
     description: 'Major update with shipping and billing addresses',
+    changelog: 'Breaking change: Added required shippingAddress, optional billingAddress, and discount field to items',
     jsonSchema: {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "type": "object",
@@ -196,9 +204,11 @@ export const mockSchemas: Schema[] = [
   },
   {
     id: '2',
+    schemaId: 'user-notification',
     name: 'UserNotification',
     version: '2.0.1',
     description: 'Schema for user notification messages',
+    changelog: 'Bug fix: Updated priority enum validation',
     jsonSchema: {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "type": "object",
@@ -223,9 +233,11 @@ export const mockSchemas: Schema[] = [
   },
   {
     id: '3',
+    schemaId: 'inventory-update',
     name: 'InventoryUpdate',
     version: '1.0.0',
     description: 'Schema for inventory synchronization events',
+    changelog: 'Initial version with basic inventory fields',
     jsonSchema: {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "type": "object",

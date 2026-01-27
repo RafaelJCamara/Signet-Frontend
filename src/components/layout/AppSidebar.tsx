@@ -46,8 +46,8 @@ export function AppSidebar() {
         </div>
         {!collapsed && (
           <div className="animate-fade-in">
-            <h1 className="font-semibold text-foreground">Schema Registry</h1>
-            <p className="text-xs text-muted-foreground">RabbitMQ</p>
+            <h1 className="font-semibold text-foreground">Signet</h1>
+            <p className="text-xs text-muted-foreground">Schema registry</p>
           </div>
         )}
       </div>

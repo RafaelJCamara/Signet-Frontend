@@ -10,9 +10,11 @@ export interface Queue {
 
 export interface Schema {
   id: string;
+  schemaId: string; // Unique identifier that never changes once created
   name: string;
   version: string;
   description: string;
+  changelog?: string; // Notes about what changed in this version
   jsonSchema: object;
   createdAt: string;
   updatedAt: string;
