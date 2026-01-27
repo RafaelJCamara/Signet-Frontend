@@ -48,7 +48,7 @@ const Dashboard = () => {
               Add Queue
             </Button>
             <Button
-              onClick={() => navigate('/schemas')}
+              onClick={() => navigate('/schemas?create=true')}
               className="glow-primary"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -127,7 +127,7 @@ const Dashboard = () => {
               <SchemaCard
                 key={schema.id}
                 schema={schema}
-                onClick={() => navigate(`/schemas/${schema.id}`)}
+                onClick={() => navigate(`/schemas?schema=${schema.schemaId}`)}
               />
             ))}
           </div>
