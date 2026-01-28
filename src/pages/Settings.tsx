@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Server, Shield, Loader2 } from 'lucide-react';
+import { Server, Shield, Loader2, Radar } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const Settings = () => {
@@ -179,6 +179,34 @@ const Settings = () => {
                 <Label className="text-base">Validate on Publish</Label>
                 <p className="text-sm text-muted-foreground mt-0.5">
                   Validate messages before they are published to queues
+                </p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Auto-Detect Settings */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+                <Radar className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Auto-Detection</CardTitle>
+                <CardDescription>
+                  Automatically detect RabbitMQ components
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-base">Auto-Detect Components</Label>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Automatically discover exchanges, queues, and bindings that need a contract
                 </p>
               </div>
               <Switch defaultChecked />

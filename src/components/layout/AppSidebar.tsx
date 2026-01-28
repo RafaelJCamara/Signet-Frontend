@@ -10,6 +10,7 @@ import {
   Rabbit,
   HelpCircle,
   Bell,
+  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ const navItems = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/queues', icon: Database, label: 'Queues' },
   { path: '/schemas', icon: FileJson, label: 'Schemas' },
+  { path: '/validation', icon: ShieldCheck, label: 'Validation' },
   { path: '/notifications', icon: Bell, label: 'Notifications' },
   { path: '/settings', icon: Settings, label: 'Settings' },
 ];

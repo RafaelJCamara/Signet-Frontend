@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import Queues from "./pages/Queues";
 import QueueDetail from "./pages/QueueDetail";
 import Schemas from "./pages/Schemas";
+import ValidationRules from "./pages/ValidationRules";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/queues" element={<Queues />} />
           <Route path="/queues/:id" element={<QueueDetail />} />
           <Route path="/schemas" element={<Schemas />} />
+          <Route path="/validation" element={<ValidationRules />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
