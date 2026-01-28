@@ -60,6 +60,7 @@ const Schemas = () => {
   useEffect(() => {
     const createParam = searchParams.get('create');
     const schemaParam = searchParams.get('schema');
+    const versionParam = searchParams.get('version');
     
     if (createParam === 'true') {
       setIsCreateOpen(true);
@@ -69,7 +70,16 @@ const Schemas = () => {
     
     if (schemaParam) {
       setExpandedGroups(new Set([schemaParam]));
-      // Clear the param after expanding
+      
+      // If a specific version is requested, open its details
+      if (versionParam) {
+        const schema = mockSchemas.find(s => s.id === versionParam);
+        if (schema) {
+          setSelectedSchema(schema);
+        }
+      }
+      
+      // Clear the params after processing
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);

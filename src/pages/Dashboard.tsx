@@ -127,7 +127,7 @@ const Dashboard = () => {
               <SchemaCard
                 key={schema.id}
                 schema={schema}
-                onClick={() => navigate(`/schemas?schema=${schema.schemaId}`)}
+                onClick={() => navigate(`/schemas?schema=${schema.schemaId}&version=${schema.id}`)}
               />
             ))}
           </div>
