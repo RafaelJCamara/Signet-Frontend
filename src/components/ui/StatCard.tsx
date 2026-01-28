@@ -12,6 +12,7 @@ interface StatCardProps {
     positive: boolean;
   };
   className?: string;
+  onClick?: () => void;
 }
 
 export function StatCard({
@@ -21,6 +22,7 @@ export function StatCard({
   icon: Icon,
   trend,
   className,
+  onClick,
 }: StatCardProps) {
   return (
     <div
@@ -29,8 +31,10 @@ export function StatCard({
         'bg-card transition-all duration-300',
         'hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5',
         'group',
+        onClick && 'cursor-pointer',
         className
       )}
+      onClick={onClick}
     >
       <div className="flex items-start justify-between">
         <div className="space-y-1">

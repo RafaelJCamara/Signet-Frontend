@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
-  Database,
   FileJson,
   Settings,
   ChevronLeft,
@@ -22,7 +21,6 @@ import {
 
 const navItems = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { path: '/queues', icon: Database, label: 'Queues' },
   { path: '/schemas', icon: FileJson, label: 'Schemas' },
   { path: '/validation', icon: ShieldCheck, label: 'Validation' },
   { path: '/notifications', icon: Bell, label: 'Notifications' },

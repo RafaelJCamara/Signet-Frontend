@@ -4,8 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
-import Queues from "./pages/Queues";
-import QueueDetail from "./pages/QueueDetail";
 import Schemas from "./pages/Schemas";
 import ValidationRules from "./pages/ValidationRules";
 import Settings from "./pages/Settings";
@@ -22,8 +20,6 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/queues" element={<Queues />} />
-          <Route path="/queues/:id" element={<QueueDetail />} />
           <Route path="/schemas" element={<Schemas />} />
           <Route path="/validation" element={<ValidationRules />} />
           <Route path="/notifications" element={<Notifications />} />
