@@ -42,7 +42,7 @@ export function AppSidebar() {
       style={{ background: 'var(--gradient-sidebar)' }}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 h-16 border-b border-sidebar-border">
+      <NavLink to="/" className="flex items-center gap-3 px-4 h-16 border-b border-sidebar-border hover:bg-sidebar-accent transition-colors">
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
           <Rabbit className="w-5 h-5 text-primary" />
         </div>
@@ -52,7 +52,7 @@ export function AppSidebar() {
             <p className="text-xs text-muted-foreground">Schema registry</p>
           </div>
         )}
-      </div>
+      </NavLink>
 
       {/* Navigation */}
       <nav className="flex-1 py-4 px-2 space-y-1">
