@@ -16,6 +16,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { toast } from '@/hooks/use-toast';
 import {
   Sheet,
   SheetContent,
@@ -185,12 +186,26 @@ const Schemas = () => {
           throw new Error(text || `Request failed ${res.status}`);
         }
 
-        console.log('Schema created:', payload);
+        toast({
+          title: 'Schema Created',
+          description: (
+            <span>
+              Schema <strong className="font-mono">{payload.id}</strong> created successfully.
+            </span>
+          ),
+          variant: 'success',
+        });
+
         setIsConfirmOpen(false);
         setIsCreateOpen(false);
         setPendingSchema(null);
       } catch (err) {
         console.error('Failed to create schema', err);
+        toast({
+          title: 'Failed to create schema',
+          description: String(err instanceof Error ? err.message : err),
+          variant: 'destructive',
+        });
         // Keep the confirm dialog open so the user can retry or go back to edit
       }
     })();
