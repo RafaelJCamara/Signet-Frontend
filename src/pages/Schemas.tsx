@@ -151,10 +151,49 @@ const Schemas = () => {
   };
 
   const handleConfirmCreate = () => {
-    console.log('Schema created:', pendingSchema);
-    setIsConfirmOpen(false);
-    setIsCreateOpen(false);
-    setPendingSchema(null);
+    (async () => {
+      if (!pendingSchema) return;
+
+      // generate id from name if missing
+      const generateSchemaId = (name?: string) =>
+        (name || '')
+          .toLowerCase()
+          .replace(/([a-z])([A-Z])/g, '$1-$2')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
+
+      const id = pendingSchema.schemaId || generateSchemaId(pendingSchema.name);
+
+      const payload = {
+        name: pendingSchema.name || '',
+        version: pendingSchema.version || '1.0.0',
+        id,
+        description: pendingSchema.description || '',
+        changeLog: pendingSchema.changelog || '',
+        schemaDefinition: JSON.stringify(pendingSchema.schema || {}),
+      };
+
+      try {
+        const res = await fetch('https://localhost:7215/api/schema', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || `Request failed ${res.status}`);
+        }
+
+        console.log('Schema created:', payload);
+        setIsConfirmOpen(false);
+        setIsCreateOpen(false);
+        setPendingSchema(null);
+      } catch (err) {
+        console.error('Failed to create schema', err);
+        // Keep the confirm dialog open so the user can retry or go back to edit
+      }
+    })();
   };
 
   const handleBackToEdit = () => {

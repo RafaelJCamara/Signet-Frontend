@@ -47,7 +47,6 @@ const Dashboard = () => {
         </div>
 
         {/* Contracts Section */}
-        {/* Contracts Section */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-foreground">Recent Contracts</h2>

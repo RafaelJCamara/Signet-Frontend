@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -82,6 +83,7 @@ export function SchemaEditor({
   const [schemaIdTouched, setSchemaIdTouched] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
+  
 
   // Auto-generate schemaId from name if not touched by user
   const handleNameChange = (newName: string) => {
@@ -118,15 +120,34 @@ export function SchemaEditor({
     }
   };
 
-  const handleSave = () => {
+  
+
+  const handleSave = async () => {
     const parsed = validateSchema();
+    if (!parsed) return;
+
+    // Build payload according to API contract.
+    // Include metadata fields from the current inputs (if present).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const payload: Record<string, any> = {
+      schemaDefinition: JSON.stringify(parsed),
+    };
+
+    const resolvedId = (schemaId && schemaId.trim()) || (name ? generateSchemaId(name) : '');
+
+    if (name && name.trim()) payload.name = name.trim();
+    if (version && version.trim()) payload.version = version.trim();
+    if (resolvedId) payload.id = resolvedId;
+    if (description && description.trim()) payload.description = description.trim();
+    if (changelog && changelog.trim()) payload.changeLog = changelog.trim();
+
     if (parsed && onSave) {
       onSave({
         schema: parsed,
         name: showMetadata ? name : undefined,
         description: showMetadata ? description : undefined,
         version: showMetadata ? version : undefined,
-        schemaId: showMetadata ? schemaId : undefined,
+        schemaId: showMetadata ? resolvedId : undefined,
         changelog: showMetadata ? changelog : undefined,
       });
     }
@@ -145,6 +166,8 @@ export function SchemaEditor({
   };
 
   const highlightedHtml = syntaxHighlight(schemaText);
+
+  
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -338,6 +361,7 @@ export function SchemaEditor({
           Save Schema
         </Button>
       </div>
+      
     </div>
   );
 }
