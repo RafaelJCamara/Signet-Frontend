@@ -8,6 +8,14 @@ export interface Queue {
   schemaId?: string;
 }
 
+// Root schema without version-specific data
+export interface RootSchema {
+  schemaId: string;
+  name: string;
+  description: string;
+  createdAt: string;
+}
+
 export interface Schema {
   id: string;
   schemaId: string; // Unique identifier that never changes once created
