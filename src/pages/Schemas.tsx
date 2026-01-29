@@ -1,9 +1,10 @@
+/* eslint-disable no-empty */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SchemaEditor } from '@/components/schema/SchemaEditor';
 import { JsonSchemaViewer } from '@/components/schema/JsonSchemaViewer';
-import { mockSchemas } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -55,41 +56,73 @@ const Schemas = () => {
     changelog?: string;
   } | null>(null);
   const [selectedSchema, setSelectedSchema] = useState<Schema | null>(null);
+  const [schemas, setSchemas] = useState<Schema[]>([]);
+  const [loadingSchemas, setLoadingSchemas] = useState(false);
+  const [schemasError, setSchemasError] = useState<string | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
-  // Handle URL parameters for opening create dialog or expanding a specific schema
+  // Fetch schemas from backend on mount
   useEffect(() => {
-    const createParam = searchParams.get('create');
-    const schemaParam = searchParams.get('schema');
-    const versionParam = searchParams.get('version');
-    
-    if (createParam === 'true') {
-      setIsCreateOpen(true);
-      // Clear the param after opening
-      setSearchParams({}, { replace: true });
-    }
-    
-    if (schemaParam) {
-      setExpandedGroups(new Set([schemaParam]));
-      
-      // If a specific version is requested, open its details
-      if (versionParam) {
-        const schema = mockSchemas.find(s => s.id === versionParam);
-        if (schema) {
-          setSelectedSchema(schema);
+    let mounted = true;
+    const load = async () => {
+      setLoadingSchemas(true);
+      setSchemasError(null);
+      try {
+        const res = await fetch('https://localhost:7215/api/schema');
+        if (!res.ok) throw new Error(`Request failed ${res.status}`);
+        const data = await res.json();
+
+        // Map API result into `Schema` shape as best-effort
+        const mapped: Schema[] = (Array.isArray(data) ? data : []).map((item: any) => ({
+          id: item.id ?? String(item._id ?? item.uid ?? ''),
+          schemaId: item.schemaId ?? item.id ?? item.name ?? '',
+          name: item.name ?? '',
+          version: item.version ?? '1.0.0',
+          description: item.description ?? item.desc ?? '',
+          changelog: item.changeLog ?? item.changelog ?? item.change_log ?? '',
+          jsonSchema: item.jsonSchema ?? (item.schemaDefinition ? JSON.parse(item.schemaDefinition) : item.jsonSchema ?? {}),
+          createdAt: item.createdAt ?? item.created_at ?? new Date().toISOString(),
+          updatedAt: item.updatedAt ?? item.updated_at ?? new Date().toISOString(),
+          usageCount: typeof item.usageCount === 'number' ? item.usageCount : 0,
+        }));
+
+        if (!mounted) return;
+        setSchemas(mapped);
+
+        // If URL requested a specific schema/version, honor it now
+        const schemaParam = searchParams.get('schema');
+        const versionParam = searchParams.get('version');
+        if (schemaParam) {
+          setExpandedGroups(new Set([schemaParam]));
         }
+        if (versionParam) {
+          const found = mapped.find((s) => s.id === versionParam);
+          if (found) setSelectedSchema(found);
+        }
+
+        // Clear params after processing
+        if (searchParams.get('create') === 'true') {
+          setIsCreateOpen(true);
+        }
+        setSearchParams({}, { replace: true });
+      } catch (err) {
+        setSchemasError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setLoadingSchemas(false);
       }
-      
-      // Clear the params after processing
-      setSearchParams({}, { replace: true });
-    }
-  }, [searchParams, setSearchParams]);
+    };
+
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [setSearchParams]);
 
   // Group schemas by schemaId
   const schemaGroups = useMemo(() => {
     const groups = new Map<string, Schema[]>();
-    
-    mockSchemas.forEach((schema) => {
+
+    schemas.forEach((schema) => {
       const key = schema.schemaId;
       if (!groups.has(key)) {
         groups.set(key, []);
@@ -108,7 +141,7 @@ const Schemas = () => {
         }
         return 0;
       });
-      
+
       result.push({
         schemaId,
         name: sortedVersions[0].name,
@@ -118,7 +151,7 @@ const Schemas = () => {
     });
 
     return result.sort((a, b) => a.name.localeCompare(b.name));
-  }, []);
+  }, [schemas]);
 
   const filteredGroups = schemaGroups.filter(
     (group) =>
@@ -186,11 +219,36 @@ const Schemas = () => {
           throw new Error(text || `Request failed ${res.status}`);
         }
 
+        // Try to read the created schema from response
+        let createdItem: any = null;
+        try {
+          createdItem = await res.json();
+        } catch {}
+
+        // Map created item (or fallback to payload) into Schema shape
+        const mapItemToSchema = (item: any) : Schema => ({
+          id: item.id ?? String(item._id ?? item.uid ?? payload.id ?? ''),
+          schemaId: item.schemaId ?? item.id ?? item.name ?? payload.id ?? '',
+          name: item.name ?? payload.name ?? '',
+          version: item.version ?? payload.version ?? '1.0.0',
+          description: item.description ?? payload.description ?? '',
+          changelog: item.changeLog ?? item.changelog ?? item.change_log ?? payload.changeLog ?? '',
+          jsonSchema: item.jsonSchema ?? (item.schemaDefinition ? JSON.parse(item.schemaDefinition) : JSON.parse(payload.schemaDefinition)),
+          createdAt: item.createdAt ?? item.created_at ?? new Date().toISOString(),
+          updatedAt: item.updatedAt ?? item.updated_at ?? new Date().toISOString(),
+          usageCount: typeof item.usageCount === 'number' ? item.usageCount : 0,
+        });
+
+        const newSchema = createdItem ? mapItemToSchema(createdItem) : mapItemToSchema(payload);
+
+        // Prepend newly created schema so it appears immediately
+        setSchemas((prev) => [newSchema, ...prev]);
+
         toast({
           title: 'Schema Created',
           description: (
             <span>
-              Schema <strong className="font-mono">{payload.id}</strong> created successfully.
+              Schema <strong className="font-mono">{newSchema.schemaId}</strong> created successfully.
             </span>
           ),
           variant: 'success',
@@ -292,7 +350,18 @@ const Schemas = () => {
         </Dialog>
 
         {/* Search */}
-        <div className="relative max-w-md">
+        {loadingSchemas ? (
+          <div className="text-center py-12">
+            <Clock className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4 animate-spin" />
+            <p className="text-muted-foreground">Loading schemas...</p>
+          </div>
+        ) : schemasError ? (
+          <div className="text-center py-12">
+            <AlertTriangle className="w-12 h-12 mx-auto text-warning/80 mb-4" />
+            <p className="text-muted-foreground">Failed to load schemas: {schemasError}</p>
+          </div>
+        ) : (
+          <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search schemas..."
@@ -300,7 +369,8 @@ const Schemas = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
-        </div>
+          </div>
+        )}
 
         {/* Schema Groups */}
         <div className="space-y-3">
