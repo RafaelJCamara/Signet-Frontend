@@ -5,7 +5,6 @@ import { useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RootSchemaEditor } from '@/components/schema/RootSchemaEditor';
 import { VersionEditor } from '@/components/schema/VersionEditor';
-import { SchemaEditor } from '@/components/schema/SchemaEditor';
 import { JsonSchemaViewer } from '@/components/schema/JsonSchemaViewer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,7 +31,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { Plus, Search, FileJson, ChevronDown, ChevronRight, Clock, AlertTriangle, GitBranch } from 'lucide-react';
 import { Schema, RootSchema } from '@/types/schema';
 import { cn } from '@/lib/utils';
@@ -611,7 +610,7 @@ const Schemas = () => {
           </div>
         )}
 
-        {/* Schema Detail Sheet */}
+        {/* Schema Detail Sheet - Read Only */}
         <Sheet open={!!selectedSchema} onOpenChange={() => setSelectedSchema(null)}>
           <SheetContent className="sm:max-w-2xl overflow-y-auto">
             {selectedSchema && (
@@ -624,6 +623,9 @@ const Schemas = () => {
                     </span>
                   </SheetTitle>
                   <SheetDescription>{selectedSchema.description}</SheetDescription>
+                  <p className="text-xs text-muted-foreground font-mono mt-1">
+                    ID: {selectedSchema.schemaId}
+                  </p>
                   {selectedSchema.changelog && (
                     <div className="mt-2 p-2 bg-muted/50 rounded-md">
                       <p className="text-xs text-muted-foreground mb-1">Changelog</p>
@@ -632,31 +634,12 @@ const Schemas = () => {
                   )}
                 </SheetHeader>
 
-                <Tabs defaultValue="preview" className="w-full">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="preview">Preview</TabsTrigger>
-                    <TabsTrigger value="edit">Edit</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="preview">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground mb-2">JSON Schema Definition</h4>
                     <JsonSchemaViewer schema={selectedSchema.jsonSchema} />
-                  </TabsContent>
-                  <TabsContent value="edit">
-                    <SchemaEditor
-                      initialSchema={selectedSchema.jsonSchema}
-                      initialName={selectedSchema.name}
-                      initialDescription={selectedSchema.description}
-                      initialVersion={selectedSchema.version}
-                      initialChangelog={selectedSchema.changelog}
-                      showMetadata
-                      isNewSchema={false}
-                      onSave={(data) => {
-                        console.log('Updated schema:', data);
-                        setSelectedSchema(null);
-                      }}
-                      onCancel={() => setSelectedSchema(null)}
-                    />
-                  </TabsContent>
-                </Tabs>
+                  </div>
+                </div>
               </>
             )}
           </SheetContent>
