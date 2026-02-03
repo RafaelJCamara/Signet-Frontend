@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 
 interface JsonSchemaViewerProps {
-  schema: object;
+  schema: object | string;
   className?: string;
 }
 
@@ -22,7 +22,9 @@ function syntaxHighlight(json: string): string {
 }
 
 export function JsonSchemaViewer({ schema, className }: JsonSchemaViewerProps) {
-  const formattedJson = JSON.stringify(schema, null, 2);
+  // Parse schema if it's a string
+  const parsedSchema = typeof schema === 'string' ? JSON.parse(schema) : schema;
+  const formattedJson = JSON.stringify(parsedSchema, null, 2);
   const highlightedHtml = syntaxHighlight(formattedJson);
   const lines = highlightedHtml.split('\n');
 
