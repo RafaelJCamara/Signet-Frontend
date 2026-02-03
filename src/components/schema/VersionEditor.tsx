@@ -17,7 +17,7 @@ interface VersionEditorProps {
   schemaId: string;
   initialVersion?: string;
   initialChangelog?: string;
-  initialSchema?: object;
+  initialSchema?: object | string;
   onSave?: (data: { 
     version: string;
     changelog: string;
@@ -55,9 +55,12 @@ export function VersionEditor({
 }: VersionEditorProps) {
   const [version, setVersion] = useState(initialVersion);
   const [changelog, setChangelog] = useState(initialChangelog);
-  const [schemaText, setSchemaText] = useState(
-    initialSchema ? JSON.stringify(initialSchema, null, 2) : ''
-  );
+  const [schemaText, setSchemaText] = useState(() => {
+    if (!initialSchema) return '';
+    // Parse string schemas before formatting
+    const parsed = typeof initialSchema === 'string' ? JSON.parse(initialSchema) : initialSchema;
+    return JSON.stringify(parsed, null, 2);
+  });
   const [validationStatus, setValidationStatus] = useState<'valid' | 'invalid' | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
