@@ -91,6 +91,13 @@ const Schemas = () => {
   const [schemasError, setSchemasError] = useState<string | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
+  // Capture URL params on mount (before they get cleared)
+  const [initialParams] = useState(() => ({
+    schema: searchParams.get('schema'),
+    version: searchParams.get('version'),
+    create: searchParams.get('create'),
+  }));
+
   // Fetch schemas from backend on mount
   useEffect(() => {
     let mounted = true;
@@ -120,20 +127,20 @@ const Schemas = () => {
         setSchemas(mapped);
 
         // If URL requested a specific schema/version, honor it now
-        const schemaParam = searchParams.get('schema');
-        const versionParam = searchParams.get('version');
-        if (schemaParam) {
-          setExpandedGroups(new Set([schemaParam]));
+        if (initialParams.schema) {
+          setExpandedGroups(new Set([initialParams.schema]));
         }
-        if (versionParam) {
-          const found = mapped.find((s) => s.id === versionParam);
+        if (initialParams.version) {
+          const found = mapped.find((s) => s.id === initialParams.version);
           if (found) setSelectedSchema(found);
         }
 
-        // Clear params after processing
-        if (searchParams.get('create') === 'true') {
+        // Handle create param
+        if (initialParams.create === 'true') {
           setIsCreateOpen(true);
         }
+        
+        // Clear params after processing
         setSearchParams({}, { replace: true });
       } catch (err) {
         setSchemasError(err instanceof Error ? err.message : String(err));
@@ -146,7 +153,7 @@ const Schemas = () => {
     return () => {
       mounted = false;
     };
-  }, [setSearchParams]);
+  }, [initialParams, setSearchParams]);
 
   // Group schemas by schemaId, including root schemas without versions
   const schemaGroups = useMemo(() => {
