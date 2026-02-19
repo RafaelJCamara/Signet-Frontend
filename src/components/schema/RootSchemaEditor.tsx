@@ -140,7 +140,9 @@ export function RootSchemaEditor({
             <TooltipContent side="top" className="max-w-xs">
               <p className="text-sm">
                 <strong>Backward</strong>: New schema can read data written by old schema.<br />
-                <strong>Forward</strong>: Old schema can read data written by new schema.
+                <strong>Forward</strong>: Old schema can read data written by new schema.<br />
+                <strong>Backward Transitive</strong>: Backward compatible across all versions.<br />
+                <strong>Forward Transitive</strong>: Forward compatible across all versions.
               </p>
             </TooltipContent>
           </Tooltip>
@@ -152,6 +154,8 @@ export function RootSchemaEditor({
           <SelectContent>
             <SelectItem value="backward">Backward Compatible</SelectItem>
             <SelectItem value="forward">Forward Compatible</SelectItem>
+            <SelectItem value="backward-transitive">Backward Transitive</SelectItem>
+            <SelectItem value="forward-transitive">Forward Transitive</SelectItem>
           </SelectContent>
         </Select>
       </div>
