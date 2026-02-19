@@ -5,20 +5,31 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
+import { CompatibilityLevel } from '@/types/schema';
 
 interface RootSchemaEditorProps {
   initialName?: string;
   initialDescription?: string;
   initialSchemaId?: string;
+  initialCompatibility?: CompatibilityLevel;
+  isEditing?: boolean;
   onSave?: (data: { 
     name: string; 
     description: string; 
     schemaId: string;
+    compatibility: CompatibilityLevel;
   }) => void;
   onCancel?: () => void;
   className?: string;
@@ -36,6 +47,8 @@ export function RootSchemaEditor({
   initialName = '',
   initialDescription = '',
   initialSchemaId = '',
+  initialCompatibility = 'backward',
+  isEditing = false,
   onSave,
   onCancel,
   className,
@@ -44,6 +57,7 @@ export function RootSchemaEditor({
   const [description, setDescription] = useState(initialDescription);
   const [schemaId, setSchemaId] = useState(initialSchemaId);
   const [schemaIdTouched, setSchemaIdTouched] = useState(false);
+  const [compatibility, setCompatibility] = useState<CompatibilityLevel>(initialCompatibility);
 
   // Auto-generate schemaId from name if not touched by user
   const handleNameChange = (newName: string) => {
@@ -65,6 +79,7 @@ export function RootSchemaEditor({
         name: name.trim(),
         description: description.trim(),
         schemaId: resolvedId,
+        compatibility,
       });
     }
   };
@@ -106,10 +121,39 @@ export function RootSchemaEditor({
           }}
           placeholder="e.g., order-created-event"
           className="font-mono"
+          disabled={isEditing}
         />
-        <p className="text-xs text-muted-foreground">
-          Auto-generated from name. Edit if needed.
-        </p>
+        {!isEditing && (
+          <p className="text-xs text-muted-foreground">
+            Auto-generated from name. Edit if needed.
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="compatibility">Compatibility Level</Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs">
+              <p className="text-sm">
+                <strong>Backward</strong>: New schema can read data written by old schema.<br />
+                <strong>Forward</strong>: Old schema can read data written by new schema.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <Select value={compatibility} onValueChange={(v) => setCompatibility(v as CompatibilityLevel)}>
+          <SelectTrigger id="compatibility">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="backward">Backward Compatible</SelectItem>
+            <SelectItem value="forward">Forward Compatible</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">
@@ -128,7 +172,7 @@ export function RootSchemaEditor({
           Cancel
         </Button>
         <Button onClick={handleSave} disabled={!isValid} className="glow-primary">
-          Create Schema
+          {isEditing ? 'Save Changes' : 'Create Schema'}
         </Button>
       </div>
     </div>

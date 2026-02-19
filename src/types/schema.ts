@@ -9,10 +9,13 @@ export interface Queue {
 }
 
 // Root schema without version-specific data
+export type CompatibilityLevel = 'backward' | 'forward';
+
 export interface RootSchema {
   schemaId: string;
   name: string;
   description: string;
+  compatibility: CompatibilityLevel;
   createdAt: string;
 }
 

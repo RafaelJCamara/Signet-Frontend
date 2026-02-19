@@ -32,14 +32,15 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 
-import { Plus, Search, FileJson, ChevronDown, ChevronRight, Clock, AlertTriangle, GitBranch } from 'lucide-react';
-import { Schema, RootSchema } from '@/types/schema';
+import { Plus, Search, FileJson, ChevronDown, ChevronRight, Clock, AlertTriangle, GitBranch, Pencil } from 'lucide-react';
+import { Schema, RootSchema, CompatibilityLevel } from '@/types/schema';
 import { cn } from '@/lib/utils';
 
 interface SchemaGroup {
   schemaId: string;
   name: string;
   description: string;
+  compatibility: CompatibilityLevel;
   versions: Schema[];
   latestVersion: Schema | null;
 }
@@ -50,24 +51,28 @@ const mockRootSchemas: RootSchema[] = [
     schemaId: 'order-created-event',
     name: 'OrderCreatedEvent',
     description: 'Schema for order creation events',
+    compatibility: 'backward',
     createdAt: '2024-01-05T10:00:00Z',
   },
   {
     schemaId: 'user-notification',
     name: 'UserNotification',
     description: 'Schema for user notification messages',
+    compatibility: 'forward',
     createdAt: '2024-01-08T09:00:00Z',
   },
   {
     schemaId: 'inventory-update',
     name: 'InventoryUpdate',
     description: 'Schema for inventory synchronization events',
+    compatibility: 'backward',
     createdAt: '2024-01-05T14:30:00Z',
   },
   {
     schemaId: 'payment-processed',
     name: 'PaymentProcessed',
     description: 'Schema for payment processing events (no versions yet)',
+    compatibility: 'backward',
     createdAt: '2024-01-20T11:00:00Z',
   },
 ];
@@ -83,6 +88,7 @@ const Schemas = () => {
     name: string;
     description: string;
     schemaId: string;
+    compatibility: CompatibilityLevel;
   } | null>(null);
   const [selectedSchema, setSelectedSchema] = useState<Schema | null>(null);
   const [schemas, setSchemas] = useState<Schema[]>([]);
@@ -90,6 +96,8 @@ const Schemas = () => {
   const [loadingSchemas, setLoadingSchemas] = useState(false);
   const [schemasError, setSchemasError] = useState<string | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [isEditRootOpen, setIsEditRootOpen] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<SchemaGroup | null>(null);
 
   // Capture URL params on mount (before they get cleared)
   const [initialParams] = useState(() => ({
@@ -195,6 +203,7 @@ const Schemas = () => {
         schemaId,
         name: rootSchema?.name || latestVersion?.name || schemaId,
         description: rootSchema?.description || latestVersion?.description || '',
+        compatibility: rootSchema?.compatibility || 'backward',
         versions: sortedVersions,
         latestVersion,
       });
@@ -226,6 +235,7 @@ const Schemas = () => {
     name: string;
     description: string;
     schemaId: string;
+    compatibility: CompatibilityLevel;
   }) => {
     setPendingRootSchema(data);
     setIsConfirmOpen(true);
@@ -239,6 +249,7 @@ const Schemas = () => {
       schemaId: pendingRootSchema.schemaId,
       name: pendingRootSchema.name,
       description: pendingRootSchema.description,
+      compatibility: pendingRootSchema.compatibility,
       createdAt: new Date().toISOString(),
     };
 
@@ -267,6 +278,7 @@ const Schemas = () => {
         schemaId: newRootSchema.schemaId,
         name: newRootSchema.name,
         description: newRootSchema.description,
+        compatibility: newRootSchema.compatibility,
         versions: [],
         latestVersion: null,
       };
@@ -277,6 +289,39 @@ const Schemas = () => {
 
   const handleBackToEdit = () => {
     setIsConfirmOpen(false);
+  };
+
+  const handleEditRoot = (group: SchemaGroup, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setEditingGroup(group);
+    setIsEditRootOpen(true);
+  };
+
+  const handleEditRootSave = (data: {
+    name: string;
+    description: string;
+    schemaId: string;
+    compatibility: CompatibilityLevel;
+  }) => {
+    if (!editingGroup) return;
+    setRootSchemas((prev) =>
+      prev.map((r) =>
+        r.schemaId === editingGroup.schemaId
+          ? { ...r, name: data.name, description: data.description, compatibility: data.compatibility }
+          : r
+      )
+    );
+    toast({
+      title: 'Schema Updated',
+      description: (
+        <span>
+          Schema <strong className="font-mono">{editingGroup.schemaId}</strong> has been updated.
+        </span>
+      ),
+      variant: 'success',
+    });
+    setIsEditRootOpen(false);
+    setEditingGroup(null);
   };
 
   const handleAddVersion = (group: SchemaGroup, e?: React.MouseEvent) => {
@@ -462,7 +507,34 @@ const Schemas = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Search */}
+        {/* Edit Root Schema Dialog */}
+        <Dialog open={isEditRootOpen} onOpenChange={setIsEditRootOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Schema</DialogTitle>
+              <DialogDescription>
+                Update the schema name, description, or compatibility level. The Schema ID cannot be changed.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              {editingGroup && (
+                <RootSchemaEditor
+                  initialName={editingGroup.name}
+                  initialDescription={editingGroup.description}
+                  initialSchemaId={editingGroup.schemaId}
+                  initialCompatibility={editingGroup.compatibility}
+                  isEditing
+                  onSave={handleEditRootSave}
+                  onCancel={() => {
+                    setIsEditRootOpen(false);
+                    setEditingGroup(null);
+                  }}
+                />
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {loadingSchemas ? (
           <div className="text-center py-12">
             <Clock className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4 animate-spin" />
@@ -516,6 +588,9 @@ const Schemas = () => {
                         <Badge variant="secondary" className="text-xs shrink-0">
                           {group.versions.length} version{group.versions.length !== 1 ? 's' : ''}
                         </Badge>
+                        <Badge variant="outline" className="text-xs shrink-0 capitalize">
+                          {group.compatibility}
+                        </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground truncate">
                         {group.description}
@@ -543,6 +618,14 @@ const Schemas = () => {
                       >
                         <GitBranch className="w-4 h-4 mr-1" />
                         Add Version
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => handleEditRoot(group, e)}
+                      >
+                        <Pencil className="w-4 h-4" />
                       </Button>
                       {expandedGroups.has(group.schemaId) ? (
                         <ChevronDown className="w-5 h-5" />
