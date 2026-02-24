@@ -430,9 +430,9 @@ const Schemas = () => {
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg">
               <DialogHeader>
-                <DialogTitle>Create New Schema</DialogTitle>
+                <DialogTitle>Create New Schema Container</DialogTitle>
                 <DialogDescription>
-                  Define a new schema type. You'll add versions with JSON Schema definitions after creating.
+                  Define a new schema container. You'll add versions with JSON Schema definitions after creating.
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4">
@@ -451,14 +451,14 @@ const Schemas = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-warning" />
-                Confirm Schema ID
+                Confirm Container ID
               </DialogTitle>
               <DialogDescription className="pt-2">
                 <p className="mb-3">
-                  The Schema ID cannot be changed after creation. All future versions of this schema will use this ID.
+                  The Container ID cannot be changed after creation. All future versions will use this ID.
                 </p>
                 <div className="bg-muted/50 rounded-lg p-3 border">
-                  <p className="text-xs text-muted-foreground mb-1">Schema ID</p>
+                  <p className="text-xs text-muted-foreground mb-1">Container ID</p>
                   <p className="font-mono text-foreground font-medium">
                     {pendingRootSchema?.schemaId || 'Not set'}
                   </p>
@@ -511,9 +511,9 @@ const Schemas = () => {
         <Dialog open={isEditRootOpen} onOpenChange={setIsEditRootOpen}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Edit Schema</DialogTitle>
+              <DialogTitle>Edit Schema Container</DialogTitle>
               <DialogDescription>
-                Update the schema name, description, or compatibility level. The Schema ID cannot be changed.
+                Update the container name, description, or compatibility level. The Container ID cannot be changed.
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
