@@ -425,7 +425,7 @@ const Schemas = () => {
             <DialogTrigger asChild>
               <Button className="glow-primary">
                 <Plus className="w-4 h-4 mr-2" />
-                Create Schema
+                Create Schema Container
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg">
