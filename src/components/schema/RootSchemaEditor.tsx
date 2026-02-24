@@ -89,7 +89,7 @@ export function RootSchemaEditor({
   return (
     <div className={cn('space-y-4', className)}>
       <div className="space-y-2">
-        <Label htmlFor="schema-name">Schema Name *</Label>
+        <Label htmlFor="schema-name">Container Name *</Label>
         <Input
           id="schema-name"
           value={name}
@@ -100,14 +100,14 @@ export function RootSchemaEditor({
 
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <Label htmlFor="schema-id">Schema ID</Label>
+          <Label htmlFor="schema-id">Container ID</Label>
           <Tooltip>
             <TooltipTrigger asChild>
               <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-xs">
               <p className="text-sm">
-                A unique identifier for this schema type. This ID <strong>cannot be changed</strong> once the schema is created. All versions of this schema will share this ID.
+                A unique identifier for this container. This ID <strong>cannot be changed</strong> once the container is created. All versions will share this ID.
               </p>
             </TooltipContent>
           </Tooltip>
@@ -176,7 +176,7 @@ export function RootSchemaEditor({
           Cancel
         </Button>
         <Button onClick={handleSave} disabled={!isValid} className="glow-primary">
-          {isEditing ? 'Save Changes' : 'Create Schema'}
+          {isEditing ? 'Save Changes' : 'Create Container'}
         </Button>
       </div>
     </div>
