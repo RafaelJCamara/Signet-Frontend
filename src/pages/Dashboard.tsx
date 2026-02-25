@@ -3,7 +3,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { StatCard } from '@/components/ui/StatCard';
 import { SchemaCard } from '@/components/dashboard/SchemaCard';
 import { mockSchemas } from '@/data/mockData';
-import { FileJson, ShieldCheck, Plus } from 'lucide-react';
+import { FileJson, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Dashboard = () => {
@@ -13,21 +13,12 @@ const Dashboard = () => {
     <AppLayout>
       <div className="p-6 lg:p-8 space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
+         <div>
             <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
             <p className="text-muted-foreground mt-1">
               Monitor your queues and message contracts
             </p>
           </div>
-          <Button
-            onClick={() => navigate('/schemas?create=true')}
-            className="glow-primary"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            New Schema Container
-          </Button>
-        </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
