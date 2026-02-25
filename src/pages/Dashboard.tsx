@@ -25,7 +25,7 @@ const Dashboard = () => {
             className="glow-primary"
           >
             <Plus className="w-4 h-4 mr-2" />
-            New Contract
+            New Schema Container
           </Button>
         </div>
 
